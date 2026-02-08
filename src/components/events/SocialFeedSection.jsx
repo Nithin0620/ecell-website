@@ -1,6 +1,55 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 const SocialFeedSection = () => {
+  const sectionRef = useRef(null);
+  const headingRef = useRef(null);
+  const cardRefs = useRef([]);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+  }, []);
+
+  useEffect(() => {
+    if (!sectionRef.current) return undefined;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        headingRef.current,
+        { y: 20, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 80%'
+          }
+        }
+      );
+
+      gsap.fromTo(
+        cardRefs.current,
+        { y: 30, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.9,
+          ease: 'power3.out',
+          stagger: 0.18,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 70%'
+          }
+        }
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   const feeds = [
     {
       id: 1,
@@ -41,9 +90,12 @@ const SocialFeedSection = () => {
   ];
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-br from-sky-50 via-emerald-50 to-white">
+    <section
+      className="py-16 px-4 bg-gradient-to-br from-sky-50 via-emerald-50 to-white"
+      ref={sectionRef}
+    >
       <div className="container mx-auto">
-        <div className="text-center max-w-2xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto" ref={headingRef}>
           <h2 className="font-oswald text-4xl md:text-5xl font-bold text-primary-dark">
             Social Feed
           </h2>
@@ -53,12 +105,15 @@ const SocialFeedSection = () => {
         </div>
 
         <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {feeds.map((feed) => (
+          {feeds.map((feed, index) => (
             <a
               key={feed.id}
               href={feed.link}
               target="_blank"
               rel="noreferrer"
+              ref={(element) => {
+                cardRefs.current[index] = element;
+              }}
               className="group relative overflow-hidden rounded-3xl border border-white/60 bg-white/40 backdrop-blur-2xl shadow-xl transition-transform duration-500 hover:-translate-y-2"
             >
               <div

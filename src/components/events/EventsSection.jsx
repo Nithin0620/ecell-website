@@ -1,13 +1,53 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import EventCard from './EventCard';
 
 const EventsSection = ({ events, visibleEvents, onLoadMore }) => {
+  const sectionRef = useRef(null);
+  const cardRefs = useRef([]);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+  }, []);
+
+  useEffect(() => {
+    if (!sectionRef.current) return undefined;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        cardRefs.current,
+        { y: 40, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.9,
+          ease: 'power3.out',
+          stagger: 0.18,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 70%',
+          },
+        }
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [visibleEvents]);
+
   return (
-    <section className="py-12 sm:py-16 px-4">
+    <section className="py-12 sm:py-16 px-4" ref={sectionRef}>
       <div className="container mx-auto">
         <div className="flex flex-col gap-6 sm:gap-10">
           {events.slice(0, visibleEvents).map((event, index) => (
-            <EventCard key={event.id} event={event} index={index} />
+            <div
+              key={event.id}
+              ref={(element) => {
+                cardRefs.current[index] = element;
+              }}
+            >
+              <EventCard event={event} index={index} />
+            </div>
           ))}
         </div>
 

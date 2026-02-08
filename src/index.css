@@ -80,8 +80,15 @@
         animation: scroll 30s linear infinite;
     }
 
+    .animate-scroll-mobile {
+        animation: scroll 15s linear infinite;
+    }
+
     .animate-scroll-reverse {
         animation: scroll-reverse 30s linear infinite;
+    }
+    .animate-scroll-reverse-mobile {
+        animation: scroll-reverse 15s linear infinite;
     }
 }
 
@@ -97,6 +104,8 @@
 .carousel-track {
     display: flex;
     gap: 16px;
+    width: max-content;
+    will-change: transform;
 }
 
 .carousel-item {

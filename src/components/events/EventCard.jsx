@@ -1,8 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 const EventCard = ({ event, index }) => {
   const isReversed = index % 2 !== 0;
   const [isHovered, setIsHovered] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [hasEnteredView, setHasEnteredView] = useState(false);
+  const cardRef = useRef(null);
   const iconPalette = [
     {
       bg: 'bg-emerald-200/70',
@@ -72,7 +75,80 @@ const EventCard = ({ event, index }) => {
   }, [event?.date]);
 
   useEffect(() => {
-    if (!isHovered) {
+    if (typeof window === 'undefined') return undefined;
+
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const handleChange = (event) => setIsDesktop(event.matches);
+
+    setIsDesktop(mediaQuery.matches);
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!cardRef.current) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setHasEnteredView(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(cardRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!hasEnteredView || !registrationNumber) {
+      setDisplayedRegistrations(rawRegistrations);
+      return undefined;
+    }
+
+    let isActive = true;
+    const duration = 900;
+    const startTime = performance.now();
+    const suffix = registrationSuffix ? ` ${registrationSuffix}` : '';
+
+    const step = (now) => {
+      if (!isActive) return;
+      const progress = Math.min(1, (now - startTime) / duration);
+      const value = Math.floor(progress * registrationNumber);
+      setDisplayedRegistrations(`${value}${suffix}`.trim());
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        setDisplayedRegistrations(rawRegistrations);
+      }
+    };
+
+    requestAnimationFrame(step);
+
+    return () => {
+      isActive = false;
+    };
+  }, [hasEnteredView, rawRegistrations, registrationNumber, registrationSuffix]);
+
+  useEffect(() => {
+    if (!isDesktop || !isHovered) {
       setDisplayedRegistrations(rawRegistrations);
       setDisplayedDate(event?.date || '');
       return undefined;
@@ -116,6 +192,7 @@ const EventCard = ({ event, index }) => {
     };
   }, [
     event?.date,
+    isDesktop,
     isHovered,
     rawRegistrations,
     registrationNumber,
@@ -127,6 +204,7 @@ const EventCard = ({ event, index }) => {
       className={`group relative w-full max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-2xl border border-white/20 ring-1 ring-white/20 transition-transform duration-500 ${
         isReversed ? 'md:-translate-x-8' : 'md:translate-x-8'
       }`}
+      ref={cardRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -145,7 +223,7 @@ const EventCard = ({ event, index }) => {
         </div>
 
         <div className="relative md:w-1/2 p-5 sm:p-7 md:p-12 flex flex-col justify-center bg-gradient-to-br from-emerald-50/80 via-cyan-50/70 to-sky-50/80 backdrop-blur-2xl border border-white/40">
-          <div className="absolute inset-0 flex items-center justify-center gap-4 lg:gap-6 opacity-100 transition-all duration-500 md:group-hover:opacity-0 pointer-events-none z-0">
+          <div className="absolute inset-0 hidden md:flex items-center justify-center gap-4 lg:gap-6 opacity-100 transition-all duration-500 md:group-hover:opacity-0 pointer-events-none z-0">
             {displayIcons.map((icon, iconIndex) => (
               <div
                 key={`${event?.id ?? 'event'}-icon-${iconIndex}`}
