@@ -5,6 +5,52 @@
 @tailwind utilities;
 
 @layer utilities {
+    @keyframes glare-sweep {
+        0% {
+            transform: translateY(-120%);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 0.2;
+        }
+        45%{
+            opacity: 0.25;
+        }
+
+        50% {
+            opacity: 0.65;
+        }
+        55%{
+            opacity: 0.25;
+        }
+
+        90% {
+            opacity: 0.2;
+        }
+
+        100% {
+            transform: translateY(120%);
+            opacity: 0;
+        }
+    }
+
+    .glare-sweep {
+        position: absolute;
+        inset: -20% 0;
+        background: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.2) 40%,
+            rgba(255, 255, 255, 0.85) 50%,
+            rgba(255, 255, 255, 0.2) 60%,
+            transparent 100%
+        );
+        mix-blend-mode: screen;
+        animation: glare-sweep 2s linear infinite;
+        pointer-events: none;
+    }
+
     @keyframes scroll {
         0% {
             transform: translateX(0);

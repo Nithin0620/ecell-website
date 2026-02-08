@@ -5,9 +5,9 @@ const EventsSection = ({ events, visibleEvents, onLoadMore }) => {
   return (
     <section className="py-16 px-4">
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events.slice(0, visibleEvents).map((event) => (
-            <EventCard key={event.id} event={event} />
+        <div className="flex flex-col gap-10">
+          {events.slice(0, visibleEvents).map((event, index) => (
+            <EventCard key={event.id} event={event} index={index} />
           ))}
         </div>
 

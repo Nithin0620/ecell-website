@@ -3,6 +3,7 @@ import Navbar from '../components/events/Navbar';
 import HeroSection from '../components/events/HeroSection';
 import EventsSection from '../components/events/EventsSection';
 import GallerySection from '../components/events/GallerySection';
+import SocialFeedSection from '../components/events/SocialFeedSection';
 import Footer from '../components/events/Footer';
 
 const Event = () => {
@@ -84,6 +85,7 @@ const Event = () => {
       <HeroSection title="OUR EVENTS" />
       <EventsSection events={events} visibleEvents={visibleEvents} onLoadMore={loadMore} />
       <GallerySection images={galleryImages} />
+      <SocialFeedSection />
       <Footer />
     </div>
   );
